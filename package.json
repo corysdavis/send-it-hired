@@ -12,6 +12,7 @@
   "dependencies": {
     "@prisma/adapter-neon": "^7.10.1",
     "@prisma/client": "^7.10.1",
+    "better-auth": "^1.7.18",
     "dotenv": "^18.0.9",
     "next": "16.4.5",
     "react": "19.3.0",
@@ -28,5 +29,10 @@
     "tailwindcss": "^4",
     "tsx": "^4.23.15",
     "typescript": "^5"
+  },
+  "allowScripts": {
+    "@prisma/engines@7.10.1": true,
+    "esbuild@0.28.2": true,
+    "prisma@7.10.1": true
   }
 }
