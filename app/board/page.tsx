@@ -3,6 +3,8 @@ import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { SignOutButton } from "./sign-out-button";
+import Link from "next/link";
+import { buttonVariants } from "@/components/ui/button";
 
 export default function BoardPage() {
   return (
@@ -20,6 +22,9 @@ async function Board() {
     <main className="space-y-4 p-8">
       <h1 className="text-2xl font-semibold">Welcome, {session.user.name}</h1>
       <p className="text-muted-foreground">Your board is coming soon.</p>
+      <Link href="/applications" className={buttonVariants()}>
+      Your applications
+      </Link>
       <SignOutButton />
     </main>
   );
