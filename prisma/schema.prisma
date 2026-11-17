@@ -1,4 +1,3 @@
-
 generator client {
   provider = "prisma-client-js"
   output   = "../generated/prisma"
@@ -9,15 +8,17 @@ datasource db {
 }
 
 model User {
-  id            String    @id
+  id            String        @id
   name          String
   email         String
-  emailVerified Boolean   @default(false)
+  emailVerified Boolean       @default(false)
   image         String?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
   sessions      Session[]
   accounts      Account[]
+  applications  Application[]
+  settings      UserSettings?
 
   @@unique([email])
   @@map("user")
@@ -69,4 +70,113 @@ model Verification {
 
   @@index([identifier])
   @@map("verification")
+}
+
+// SendItHired models
+
+enum ApplicationStatus {
+  SAVED
+  APPLIED
+  INTERVIEW
+  OFFER
+  REJECTED
+  WITHDRAWN
+  GHOSTED
+}
+
+enum WorkMode {
+  REMOTE
+  HYBRID
+  ONSITE
+}
+
+model Application {
+  id         String            @id @default(cuid())
+  userId     String
+  user       User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  company    String
+  title      String
+  postingUrl String?
+  location   String?
+  workMode   WorkMode?
+  payMin     Int?
+  payMax     Int?
+  source     String?
+  status     ApplicationStatus @default(APPLIED)
+  appliedAt  DateTime?         @db.Date
+  position   Int               @default(0)
+  archivedAt DateTime?
+  createdAt  DateTime          @default(now())
+  updatedAt  DateTime          @updatedAt
+
+  statusChanges StatusChange[]
+  notes         Note[]
+  reminders     Reminder[]
+  contacts      Contact[]
+
+  @@index([userId, status, position])
+  @@map("application")
+}
+
+model StatusChange {
+  id            String             @id @default(cuid())
+  applicationId String
+  application   Application        @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  fromStatus    ApplicationStatus?
+  toStatus      ApplicationStatus
+  changedAt     DateTime           @default(now())
+
+  @@index([applicationId, changedAt])
+  @@map("status_change")
+}
+
+model Note {
+  id            String      @id @default(cuid())
+  applicationId String
+  application   Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  body          String
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  @@index([applicationId, createdAt])
+  @@map("note")
+}
+
+model Reminder {
+  id            String      @id @default(cuid())
+  applicationId String
+  application   Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  dueOn         DateTime    @db.Date
+  label         String
+  completedAt   DateTime?
+  createdAt     DateTime    @default(now())
+
+  @@index([applicationId])
+  @@index([dueOn])
+  @@map("reminder")
+}
+
+model Contact {
+  id            String      @id @default(cuid())
+  applicationId String
+  application   Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  name          String
+  role          String?
+  email         String?
+  linkedinUrl   String?
+  createdAt     DateTime    @default(now())
+
+  @@map("contact")
+}
+
+model UserSettings {
+  userId              String    @id
+  user                User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  digestEnabled       Boolean   @default(false)
+  timezone            String    @default("America/New_York")
+  defaultFollowUpDays Int       @default(7)
+  isDemo              Boolean   @default(false)
+  demoExpiresAt       DateTime?
+
+  @@map("user_settings")
 }
